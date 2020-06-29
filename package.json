@@ -1,0 +1,27 @@
+{
+  "name": "discord-elevator-app",
+  "version": "1.0.0",
+  "description": "discord moving bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "discord",
+    "discord.js",
+    "eris",
+    "npm",
+    "node",
+    "typescript"
+  ],
+  "author": "Quirin Ecker",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/implodium/discord-elevator-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/implodium/discord-elevator-app/issues"
+  },
+  "homepage": "https://github.com/implodium/discord-elevator-app#readme"
+}
