@@ -22,9 +22,13 @@ export abstract class ElevatorCommand {
         } catch (e) {
             if (e instanceof BotException) {
                 await msg.channel.createMessage(e.message)
-            } else await msg.channel.createMessage(
-                `Something went wrong please contact the maintainer: LebenderFux`
-            )
+            } else {
+                await msg.channel.createMessage(
+                    `Something went wrong please contact the maintainer: LebenderFux`
+                )
+
+                console.log(e.message);
+            }
         }
 
     }
