@@ -18,7 +18,7 @@ export abstract class ElevatorCommand {
         try {
             if (this.argsAreValid(args)) {
                 await this.run(msg, args)
-            } else throw new Error('Invalid number of arguments')
+            } else throw new BotException('Invalid number of arguments')
         } catch (e) {
             if (e instanceof BotException) {
                 await msg.channel.createMessage(e.message)
