@@ -30,22 +30,30 @@ export class Elevate extends ElevatorCommand {
 
         if ((textChannel.guild.members.get(msg.author.id) as Member).permission.has('voiceMoveMembers')) {
             const interval = setInterval(async() => {
-                let channelToMove: VoiceChannel = channels.filter(channel => {
-                    if ((textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position < finalChannel.position) {
-                        return (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position + 1 === channel.position;
-                    } else if ((textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position > finalChannel.position) {
-                        return (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position - 1 === channel.position;
-                    }
-                })[0] as VoiceChannel;
+                let channelToMove: VoiceChannel;
+                let countTo = 1;
 
+                if (finalChannel.id === (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).id) {
+                    clearInterval(interval);
+                    await msg.channel.createMessage('Elevator has arrived')
+                    return;
+                }
+
+                do {
+                    channelToMove = channels.filter(channel => {
+                        if ((textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position < finalChannel.position) {
+                            return (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position + countTo === channel.position;
+                        } else if ((textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position > finalChannel.position) {
+                            return (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position - countTo === channel.position;
+                        }
+                    })[0] as VoiceChannel;
+
+                    countTo++;
+                } while (!channelToMove.permissionsOf(member.id).has('voiceConnect'))
 
                 await member.edit({
                     channelID: channelToMove.id
                 })
-
-                if (finalChannel.id === (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).id) {
-                    clearInterval(interval);
-                }
             }, 1000)
         } else throw new BotException('Only allowed to members with move rights')
     }
