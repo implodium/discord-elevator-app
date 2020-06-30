@@ -1,4 +1,5 @@
 import {Message} from "eris";
+import {BotException} from "../BotException";
 
 export abstract class ElevatorCommand {
     public readonly name: string;
@@ -13,8 +14,22 @@ export abstract class ElevatorCommand {
 
     protected async abstract run(msg: Message, args: Array<string>): Promise<void>;
 
-
     public async execute(msg: Message, args: Array<string>) {
-        await this.run(msg, args)
+        try {
+            if (this.argsAreValid(args)) {
+                await this.run(msg, args)
+            } else throw new Error('Invalid number of arguments')
+        } catch (e) {
+            if (e instanceof BotException) {
+                await msg.channel.createMessage(e.message)
+            } else await msg.channel.createMessage(
+                `Something went wrong please contact the maintainer: LebenderFux`
+            )
+        }
+
+    }
+
+    private argsAreValid(args: Array<string>) {
+        return args.length > this.minArgs && args.length < this.maxArgs
     }
 }
