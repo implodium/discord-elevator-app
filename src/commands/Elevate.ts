@@ -5,13 +5,13 @@ import {BotException} from "../BotException";
 export class Elevate extends ElevatorCommand {
 
     constructor() {
-        super('elevate', 2,2);
+        super('elevate', 2, Number.MAX_VALUE);
     }
 
 
     protected async run(msg: Message, args: Array<string>): Promise<void> {
         const who: string = args[0];
-        const where: string = args[1];
+        const where: string = args.slice(1, args.length).join(' ');
         const textChannel: TextChannel = msg.channel as TextChannel;
         const channels: Array<VoiceChannel> = textChannel.guild.channels.filter(channel => {
             return channel instanceof VoiceChannel
