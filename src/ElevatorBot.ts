@@ -1,6 +1,7 @@
 import {CommandClient} from "eris";
-import fs from "fs";
+import {readFileSync} from "fs";
 import {ElevatorCommand} from "./commands/ElevatorCommand";
+import {Elevate} from "./commands/Elevate";
 
 export class ElevatorBot {
     public static instance: ElevatorBot
@@ -30,10 +31,11 @@ export class ElevatorBot {
     }
 
     private static readConfig(): ConfigurationInterface {
-        return JSON.parse(fs.readFileSync('config.js', {encoding: "utf8"}));
+        return JSON.parse(readFileSync('./config.json', 'utf-8'));
     }
 
     private init() {
+        this.initializeCommand(new Elevate());
     }
 
     private initializeCommand(command: ElevatorCommand) {

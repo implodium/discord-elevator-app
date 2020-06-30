@@ -30,6 +30,6 @@ export abstract class ElevatorCommand {
     }
 
     private argsAreValid(args: Array<string>) {
-        return args.length > this.minArgs && args.length < this.maxArgs
+        return args.length >= this.minArgs && args.length <= this.maxArgs
     }
 }
