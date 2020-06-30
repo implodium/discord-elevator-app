@@ -4,7 +4,8 @@
   "description": "discord moving bot",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc-watch --onSuccess \"node dist/\""
   },
   "keywords": [
     "discord",
@@ -28,6 +29,7 @@
     "@types/node": "^14.0.14",
     "discord.js": "^12.2.0",
     "eris": "^0.13.3",
+    "tsc-watch": "^4.2.9",
     "typescript": "^3.9.5"
   }
 }
