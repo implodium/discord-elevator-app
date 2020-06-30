@@ -1,5 +1,6 @@
 import {ElevatorCommand} from "./ElevatorCommand";
 import {Channel, Collection, Member, Message, TextChannel, VoiceChannel} from "eris";
+import {BotException} from "../BotException";
 
 export class Elevate extends ElevatorCommand {
 
@@ -50,10 +51,14 @@ export class Elevate extends ElevatorCommand {
     private getChannelByName(name: string, textChannel: TextChannel): VoiceChannel {
         const channels: Collection<Channel> = textChannel.guild.channels;
 
-        return channels.filter(channel => {
+        const voiceChannelsWithName = channels.filter(channel => {
             if (channel instanceof VoiceChannel) {
                 return channel.name === name
             } else return false;
-        })[0] as VoiceChannel;
+        })
+
+        if (voiceChannelsWithName.length < 1) {
+            throw new BotException('VoiceChannel not found')
+        } else return voiceChannelsWithName[0] as VoiceChannel;
     }
 }
