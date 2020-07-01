@@ -60,6 +60,10 @@ export class Elevate extends ElevatorCommand {
 
                 } catch(e) {
                     clearInterval(interval);
+
+                    if (e instanceof BotException) {
+                        throw new BotException(e.message);
+                    }
                 }
             }, 1000)
         } else throw new BotException('Only allowed to members with move rights')
