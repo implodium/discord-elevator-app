@@ -1,6 +1,7 @@
 import {ElevatorCommand} from "./ElevatorCommand";
 import {Channel, Collection, Member, Message, TextChannel, VoiceChannel} from "eris";
 import {BotException} from "../BotException";
+import Timeout = NodeJS.Timeout;
 
 export class Elevate extends ElevatorCommand {
 
@@ -10,6 +11,7 @@ export class Elevate extends ElevatorCommand {
 
 
     protected async run(msg: Message, args: Array<string>): Promise<void> {
+        let interval: Timeout;
         const who: string = args[0];
         const where: string = args.slice(1, args.length).join(' ');
         const textChannel: TextChannel = msg.channel as TextChannel;
@@ -29,31 +31,36 @@ export class Elevate extends ElevatorCommand {
         const member: Member = textChannel.guild.members.get(who.replace(/[^0-9]/g, '')) as Member;
 
         if ((textChannel.guild.members.get(msg.author.id) as Member).permission.has('voiceMoveMembers')) {
-            const interval = setInterval(async() => {
+            interval = setInterval(async() => {
                 let channelToMove: VoiceChannel;
                 let countTo = 1;
 
-                if (finalChannel.id === (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).id) {
+                try {
+                    if (finalChannel.id === (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).id) {
+                        clearInterval(interval);
+                        await msg.channel.createMessage('Elevator has arrived')
+                        return;
+                    }
+
+                    do {
+                        channelToMove = channels.filter(channel => {
+                            if ((textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position < finalChannel.position) {
+                                return (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position + countTo === channel.position;
+                            } else if ((textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position > finalChannel.position) {
+                                return (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position - countTo === channel.position;
+                            }
+                        })[0] as VoiceChannel;
+
+                        countTo++;
+                    } while (!channelToMove.permissionsOf(member.id).has('voiceConnect'))
+
+                    await member.edit({
+                        channelID: channelToMove.id
+                    })
+
+                } catch(e) {
                     clearInterval(interval);
-                    await msg.channel.createMessage('Elevator has arrived')
-                    return;
                 }
-
-                do {
-                    channelToMove = channels.filter(channel => {
-                        if ((textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position < finalChannel.position) {
-                            return (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position + countTo === channel.position;
-                        } else if ((textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position > finalChannel.position) {
-                            return (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).position - countTo === channel.position;
-                        }
-                    })[0] as VoiceChannel;
-
-                    countTo++;
-                } while (!channelToMove.permissionsOf(member.id).has('voiceConnect'))
-
-                await member.edit({
-                    channelID: channelToMove.id
-                })
             }, 1000)
         } else throw new BotException('Only allowed to members with move rights')
     }
