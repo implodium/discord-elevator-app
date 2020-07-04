@@ -1,0 +1,8 @@
+version: '3.7'
+
+services:
+  node:
+    restart: always
+    container_name: elevator-app
+    build: .
+    image: elevator-app/deploy
