@@ -74,7 +74,7 @@ export class Elevate extends ElevatorCommand {
 
         const voiceChannelsWithName = channels.filter(channel => {
             if (channel instanceof VoiceChannel) {
-                return channel.name === name
+                return channel.name.includes(name)
             } else return false;
         })
 
