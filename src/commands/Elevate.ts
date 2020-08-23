@@ -30,7 +30,7 @@ export class Elevate extends ElevatorCommand {
 
         const voiceChannelsWithName = channels.filter(channel => {
             if (channel instanceof VoiceChannel) {
-                return channel.name.includes(name)
+                return channel.name.toLowerCase().includes(name.toLocaleLowerCase())
             } else return false;
         })
 
