@@ -1,7 +1,6 @@
 import {ElevatorCommand} from "./ElevatorCommand";
-import {Channel, Collection, Member, Message, TextChannel, VoiceChannel} from "eris";
+import {Channel, Collection, Guild, Member, Message, TextChannel, VoiceChannel} from "eris";
 import {BotException} from "../BotException";
-import Timeout = NodeJS.Timeout;
 
 export class Elevate extends ElevatorCommand {
 
@@ -11,9 +10,36 @@ export class Elevate extends ElevatorCommand {
 
 
     protected async run(msg: Message, args: Array<string>): Promise<void> {
-        let interval: Timeout;
         const who: string = args[0];
         const where: string = args.slice(1, args.length).join(' ');
+
+        if (who === 'all') {
+            const voiceChannel: VoiceChannel = Elevate.getAuthorsVoiceChannel(msg)
+            const membersOfChannel: Collection<Member> = Elevate.getAllMembersOfVoiceChannel(voiceChannel)
+
+            membersOfChannel.forEach(member => {
+                this.move(member.id, where, msg)
+            })
+        } else {
+            await this.move(who, where, msg)
+        }
+    }
+
+    private getChannelByName(name: string, textChannel: TextChannel): VoiceChannel {
+        const channels: Collection<Channel> = textChannel.guild.channels;
+
+        const voiceChannelsWithName = channels.filter(channel => {
+            if (channel instanceof VoiceChannel) {
+                return channel.name.includes(name)
+            } else return false;
+        })
+
+        if (voiceChannelsWithName.length < 1) {
+            throw new BotException('VoiceChannel not found')
+        } else return voiceChannelsWithName[0] as VoiceChannel;
+    }
+
+    private async move(who: string, where: string, msg: Message): Promise<void> {
         const textChannel: TextChannel = msg.channel as TextChannel;
         const channels: Array<VoiceChannel> = textChannel.guild.channels.filter(channel => {
             return channel instanceof VoiceChannel
@@ -31,7 +57,7 @@ export class Elevate extends ElevatorCommand {
         const member: Member = textChannel.guild.members.get(who.replace(/[^0-9]/g, '')) as Member;
 
         if ((textChannel.guild.members.get(msg.author.id) as Member).permission.has('voiceMoveMembers')) {
-            interval = setInterval(async() => {
+            let interval = setInterval(async() => {
                 let channelToMove: VoiceChannel;
                 let countTo = 1;
 
@@ -69,17 +95,14 @@ export class Elevate extends ElevatorCommand {
         } else throw new BotException('Only allowed to members with move rights')
     }
 
-    private getChannelByName(name: string, textChannel: TextChannel): VoiceChannel {
-        const channels: Collection<Channel> = textChannel.guild.channels;
+    private static getAllMembersOfVoiceChannel(voiceChannel: VoiceChannel): Collection<Member> {
+        return voiceChannel.voiceMembers
+    }
 
-        const voiceChannelsWithName = channels.filter(channel => {
-            if (channel instanceof VoiceChannel) {
-                return channel.name.includes(name)
-            } else return false;
-        })
+    private static getAuthorsVoiceChannel(msg: Message) {
+        const guild: Guild = (msg.channel as TextChannel).guild;
+        const voiceChannelId = (guild.members.get(msg.author.id) as Member).voiceState.channelID as string
 
-        if (voiceChannelsWithName.length < 1) {
-            throw new BotException('VoiceChannel not found')
-        } else return voiceChannelsWithName[0] as VoiceChannel;
+        return guild.channels.get(voiceChannelId) as VoiceChannel;
     }
 }
