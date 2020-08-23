@@ -64,7 +64,7 @@ export class Elevate extends ElevatorCommand {
                 try {
                     if (finalChannel.id === (textChannel.guild.channels.get(member.voiceState.channelID as string) as VoiceChannel).id) {
                         clearInterval(interval);
-                        await msg.channel.createMessage('Elevator has arrived')
+                        await msg.channel.createMessage(`<@${member.id}> has arrived at the ${finalChannel.name} Voice Channel`)
                         return;
                     }
 
