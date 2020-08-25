@@ -27,7 +27,7 @@ export abstract class ElevatorCommand {
                     `Something went wrong please contact the maintainer: LebenderFux`
                 )
 
-                console.log(e.message);
+                console.log(e.stack);
             }
         }
 
