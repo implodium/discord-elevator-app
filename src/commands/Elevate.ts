@@ -10,19 +10,41 @@ export class Elevate extends ElevatorCommand {
 
 
     protected async run(msg: Message, args: Array<string>): Promise<void> {
-        const who: string = args[0];
-        const where: string = args.slice(1, args.length).join(' ');
 
-        if (who === 'all') {
+        if (args[0] === 'all') {
             const voiceChannel: VoiceChannel = Elevate.getAuthorsVoiceChannel(msg)
             const membersOfChannel: Collection<Member> = Elevate.getAllMembersOfVoiceChannel(voiceChannel)
+            const where: string = args.slice(1, args.length).join(' ');
 
             membersOfChannel.forEach(member => {
                 this.move(member.id, where, msg)
             })
         } else {
-            await this.move(who, where, msg)
+            const memberIdsToMove: Array<string> = new Array<string>();
+            let where: string
+
+            args.forEach((argument, argumentPosition) => {
+                if (/<@[0-9]*>/gm.test(argument) && Elevate.isMentionInVoice(argument, msg)) {
+                    memberIdsToMove.push(argument);
+                } else {
+                    where = args.slice(argumentPosition, args.length).join(' ')
+                }
+            })
+
+            memberIdsToMove.forEach(memberId => {
+                this.move(memberId, where, msg)
+            })
         }
+    }
+
+    private static isMentionInVoice(mention: string, msg: Message): boolean {
+        const member = Elevate.getMemberByMention(mention, msg)
+        return member.voiceState != undefined;
+    }
+
+    private static getMemberByMention(mention: string, msg: Message): Member {
+        const textChannel = msg.channel as TextChannel
+        return textChannel.guild.members.get(mention.replace(/[^0-9]/g, '')) as Member;
     }
 
     private getChannelByName(name: string, textChannel: TextChannel): VoiceChannel {
